@@ -6,7 +6,6 @@ import org.butu.sugar.entity.IReg;
 import org.butu.sugar.listeners.SetWrapper;
 import org.butu.sugar.listeners.StateChangeListener;
 
-import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -210,11 +209,6 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
         return list.getRawSet().toArray(a);
     }
 
-    @Deprecated
-    public Set<E> getAll() {
-        return list.getRawSet();
-    }
-
     public void addListener(StateChangeListener listener) {
     	list.addListener(listener);
     }
@@ -262,49 +256,6 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    static public <E extends IReg> void save(RegsetSmart<E> rs, EntityManager em) {
-        if (rs.hasDeleted()) {
-            for (E reg: rs.getDeleted()) {
-                em.remove(em.merge(reg));
-            }
-        }
-        if (!rs.isEmpty()) {
-            for (E reg: rs) {
-                if (reg.getId() == null) {
-                    em.persist(reg);
-                } else {
-                    em.merge(reg);
-                }
-            }
-        }
-    }
-    static public <E extends IReg> void save(RegsetSmart<E> rs, EntityManager em, int portion) {
-        if (rs.hasDeleted()) {
-            for (E reg: rs.getDeleted()) {
-                em.remove(em.merge(reg));
-            }
-        }
-
-        if (!rs.isEmpty()) {
-            int i = 0;
-            for (E reg: rs) {
-                if (i >= portion) {
-                    i = 0;
-                    em.flush();
-                    em.clear();
-                } else {
-                    i++;
-                }
-
-                if (reg.getId() == null) {
-                    em.persist(reg);
-                } else {
-                    em.merge(reg);
-                }
-            }
         }
     }
 }
