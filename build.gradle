@@ -1,5 +1,5 @@
 group 'ru.kbakaras.sugar'
-version '0.0.16'
+version '0.0.20'
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
