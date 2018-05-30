@@ -5,6 +5,7 @@ import org.butu.sugar.entity.IEntity;
 import org.butu.sugar.entity.IReg;
 import org.butu.sugar.listeners.SetWrapper;
 import org.butu.sugar.listeners.StateChangeListener;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -15,6 +16,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -24,17 +27,19 @@ import java.util.function.Predicate;
  *
  * @param <E>
  */
-public abstract class RegsetSmart<E extends IReg> implements Serializable, Iterable<E>, Cloneable {
+public class Regset<E extends IReg> implements Serializable, Iterable<E>, Cloneable {
     private static final long serialVersionUID = 1L;
 
     private SetWrapper<E> list;
     private Set<E> deleted;
 
-    public RegsetSmart() {
-        this.list = new SetWrapper<E>(new HashSet<E>());
-    }
-    public RegsetSmart(Collection<E> list) {
-        if (list instanceof HashSet) {
+    private BiConsumer<E, E> replaceValue;
+    private BiPredicate<E, E> addValue;
+
+    private Regset(Collection<E> list) {
+        if (list == null) {
+            this.list = new SetWrapper<E>(new HashSet<E>());
+        } else if (list instanceof HashSet) {
 			this.list = new SetWrapper<E>((HashSet<E>) list);
         } else {
 			this.list = new SetWrapper<E>(new HashSet<E>(list));
@@ -95,8 +100,8 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
             Iterator<E> iterator = deleted.iterator();
             while (iterator.hasNext()) {
                 E dr = iterator.next();
-                if (((Equivalence) dr).equivalent(reg)) {
-                    replaceValue(dr, reg);
+                if (dr.equivalent(reg)) {
+                    replaceValue.accept(dr, reg);
                     list.add(dr);
                     iterator.remove();
                     return;
@@ -120,7 +125,7 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
         while (iterator.hasNext()) {
             E found = iterator.next();
             if (((Equivalence) found).equivalent(reg)) {
-                if (!addValue(found, reg)) {
+                if (!addValue.test(found, reg)) {
                     remember(found);
                     iterator.remove();
                 }
@@ -130,25 +135,6 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
 
         add(reg);
     }
-
-	/**
-     * Вызывается из процедуры добавления элемента, в случае, когда эквивалентный элемент обнаружен
-     * в наборе и необходимо произвести сложение значений.
-     * @param found Элемент, обнаруженный в наборе. К значению этого элемента необходимо добавить
-     * значение из добавляемого элемента.
-     * @param item Добавляемый элемент.
-     * @return <b>true</b>, если в результате добавления получилось ненулевое значение, в противном случе,
-     * необходимо вернуть значение <b>false</b> (следовательно, значение будет удалено из набора).
-     */
-    abstract protected boolean addValue(E found, E item);
-    /**
-     * Вызывается из процедуры добавления элемента, в случае, когда эквивалентный элемент обнаружен
-     * среди помеченных на удаление объектов и необходимо вернуть его оттуда в основной набор заменив
-     * при этом значение на значение из добавляемого элемента.
-     * @param found Элемент, обнаруженный среди помеченных на удаление.
-     * @param item Добавляемый элемент.
-     */
-    abstract protected void replaceValue(E found, E item);
 
     public boolean isEmpty() {
         return list.isEmpty();
@@ -174,11 +160,12 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
     /**
      * Помечает все элементы как удалённые
      */
-    public void clear() {
+    public Regset<E> clear() {
         for (E element: list) {
             remember(element);
         }
         list.clear();
+        return this;
     }
 
     /**
@@ -217,9 +204,9 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
     }
 
     @SuppressWarnings("unchecked")
-    public RegsetSmart<E> clone() {
+    public Regset<E> clone() {
         try {
-            RegsetSmart<E> rs = (RegsetSmart<E>)super.clone();
+            Regset<E> rs = (Regset<E>)super.clone();
 
             Method method = null;
             if (deleted != null) {
@@ -258,4 +245,59 @@ public abstract class RegsetSmart<E extends IReg> implements Serializable, Itera
             throw new RuntimeException(e);
         }
     }
+
+    private boolean replacingAdd(E found, E item) {
+        replaceValue.accept(found, item);
+        return true;
+    }
+
+    /**
+     * @param list         Исходные данные (любая коллекция). Если null, будет создан
+     *                     пустой регсет.
+     * @param replaceValue Вызывается из процедуры добавления элемента, в случае, когда
+     *                     эквивалентный элемент обнаружен среди помеченных на удаление
+     *                     объектов и необходимо вернуть его оттуда в основной набор
+     *                     заменив при этом значение на значение из добавляемого элемента.
+     *                     Первый аргумент - это элемент, найденный внутри регсета, второй
+     *                     аргумент - элемент переданный для добавления или замены в
+     *                     соответствующий метод регсета.
+     * @param addValue     Вызывается из процедуры добавления элемента, в случае, когда
+     *                     эквивалентный элемент обнаружен в наборе и необходимо произвести
+     *                     сложение значений. Это предикат, возвращающий <b>true</b>, если
+     *                     в результате добавления получилось ненулевое значение, в противном
+     *                     случе необходимо вернуть значение <b>false</b> (следовательно,
+     *                     значение будет удалено из набора). Первый аргумент - элемент,
+     *                     обнаруженный в наборе. К значению этого элемента необходимо добавить
+     *                     значение из добавляемого элемента. Второй элемент - добавляемый элемент.
+     * @return Регсет, умеющий складывать значения, проинициализированный переданными данными.
+     */
+    public static <E extends IReg> Regset<E> create(Collection<E> list, BiConsumer<E, E> replaceValue, BiPredicate<E, E> addValue) {
+        Assert.notNull(replaceValue, "Non null Replacer must be specified!");
+        Assert.notNull(addValue, "Non null Adder must be specified!");
+
+        Regset<E> regset = new Regset<>(list);
+        regset.replaceValue = replaceValue;
+        regset.addValue     = addValue;
+        return regset;
+    }
+
+    /**
+     * Регсет, умеющий только заменять значения.
+     * Аналогичен {@link Regset#create(Collection, BiConsumer, BiPredicate)}, но без
+     * предиката для сложения значений.
+     */
+    public static <E extends IReg> Regset<E> create(Collection<E> list, BiConsumer<E, E> replaceValue) {
+        Assert.notNull(replaceValue, "Non null Replacer must be specified!");
+
+        Regset<E> regset = new Regset<>(list);
+        regset.replaceValue = replaceValue;
+        regset.addValue     = regset::replacingAdd;
+        return regset;
+    }
+
+    /**
+     * replace-метод для тех случаев, когда ничего не должно происходить при замене,
+     * в регсете просто остаётся найденный элемент, как есть.
+     */
+    public static <E extends IReg> void replaceValueNoop(E found, E item) {}
 }

@@ -2,7 +2,7 @@ package ru.kbakars.jpa.repository;
 
 import org.butu.sugar.entity.IReg;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kbakars.jpa.RegsetSmart;
+import ru.kbakars.jpa.Regset;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -13,7 +13,7 @@ public class RegsetRepositoryImpl<R extends IReg> implements RegsetRepository<R>
 
     @Override
     @Transactional
-    public void save(RegsetSmart<R> regset) {
+    public void save(Regset<R> regset) {
         if (regset.hasDeleted()) {
             for (R reg: regset.getDeleted()) {
                 em.remove(em.merge(reg));
@@ -32,7 +32,7 @@ public class RegsetRepositoryImpl<R extends IReg> implements RegsetRepository<R>
 
     @Override
     @Transactional
-    public void save(RegsetSmart<R> regset, int portion) {
+    public void save(Regset<R> regset, int portion) {
         if (regset.hasDeleted()) {
             for (R reg: regset.getDeleted()) {
                 em.remove(em.merge(reg));
