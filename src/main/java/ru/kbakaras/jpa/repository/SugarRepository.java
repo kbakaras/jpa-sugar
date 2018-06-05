@@ -1,4 +1,4 @@
-package ru.kbakars.jpa.repository;
+package ru.kbakaras.jpa.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

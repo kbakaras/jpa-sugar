@@ -1,4 +1,4 @@
-package ru.kbakars.jpa;
+package ru.kbakaras.jpa;
 
 import java.util.UUID;
 
