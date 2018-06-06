@@ -1,7 +1,7 @@
 package ru.kbakaras.jpa.repository;
 
-import org.butu.sugar.entity.IReg;
 import ru.kbakaras.jpa.Regset;
+import ru.kbakaras.sugar.entity.IReg;
 
 public interface RegsetRepository<R extends IReg> {
     void save(Regset<R> regset);

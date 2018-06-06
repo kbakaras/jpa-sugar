@@ -1,6 +1,6 @@
 package ru.kbakaras.jpa;
 
-import org.butu.sugar.entity.IEntity;
+import ru.kbakaras.sugar.entity.IEntity;
 
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;

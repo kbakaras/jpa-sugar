@@ -1,11 +1,11 @@
 package ru.kbakaras.jpa;
 
-import org.butu.sugar.compare.Equivalence;
-import org.butu.sugar.entity.IEntity;
-import org.butu.sugar.entity.IReg;
-import org.butu.sugar.listeners.SetWrapper;
-import org.butu.sugar.listeners.StateChangeListener;
 import org.springframework.util.Assert;
+import ru.kbakaras.sugar.compare.Equivalence;
+import ru.kbakaras.sugar.entity.IEntity;
+import ru.kbakaras.sugar.entity.IReg;
+import ru.kbakaras.sugar.listeners.SetWrapper;
+import ru.kbakaras.sugar.listeners.StateChangeListener;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;

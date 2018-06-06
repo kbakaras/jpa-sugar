@@ -1,8 +1,8 @@
 package ru.kbakaras.jpa.repository;
 
-import org.butu.sugar.entity.IReg;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kbakaras.jpa.Regset;
+import ru.kbakaras.sugar.entity.IReg;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
