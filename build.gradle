@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile('ru.kbakaras.sugar:sugar:1.2.1')
+    compile('ru.kbakaras.sugar:sugar:1.2.2')
 
     compile('org.springframework.data:spring-data-jpa:2.0.+')
     compile('org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final')
