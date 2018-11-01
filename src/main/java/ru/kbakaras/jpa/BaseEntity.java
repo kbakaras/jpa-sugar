@@ -2,27 +2,14 @@ package ru.kbakaras.jpa;
 
 import ru.kbakaras.sugar.entity.IEntity;
 
-import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
 @MappedSuperclass
 public abstract class BaseEntity<ID> implements IEntity<ID> {
-    @Id
-    protected ID id;
-
     @Version
     protected int version;
 
-
-    @Override
-    public ID getId() {
-        return id;
-    }
-    @Override
-    public void setId(ID id) {
-        this.id = id;
-    }
 
     public int getVersion() {
         return version;
@@ -31,7 +18,7 @@ public abstract class BaseEntity<ID> implements IEntity<ID> {
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return getId().hashCode();
     }
 
     @Override
@@ -40,7 +27,7 @@ public abstract class BaseEntity<ID> implements IEntity<ID> {
             return true;
         } else {
             if (this.getClass().equals(obj.getClass())) {
-                return this.id.equals(((BaseEntity) obj).id);
+                return this.getId().equals(((BaseEntity) obj).getId());
             }
             return false;
         }

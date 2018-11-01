@@ -1,5 +1,8 @@
 package ru.kbakaras.jpa;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.util.UUID;
 
 /**
@@ -8,8 +11,18 @@ import java.util.UUID;
  * Имеется конструктор без параметров, который присваивает id новой случайное
  * UUID-значение.
  */
+@MappedSuperclass
 public abstract class ProperEntity extends BaseEntity<UUID> {
-    public ProperEntity() {
-        this.id = UUID.randomUUID();
+    @Id
+    @GeneratedValue
+    protected UUID id;
+
+    @Override
+    public UUID getId() {
+        return id;
+    }
+    @Override
+    public void setId(UUID id) {
+        this.id = id;
     }
 }
