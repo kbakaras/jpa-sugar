@@ -1,4 +1,6 @@
 /.idea
 /.gradle
 /.out
+/out
+/build
 jpa-sugar.iml
