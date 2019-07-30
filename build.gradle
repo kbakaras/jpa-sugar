@@ -1,5 +1,5 @@
 group 'ru.kbakaras.sugar'
-version '0.1.0-SNAPSHOT'
+version '0.1.0'
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile('ru.kbakaras.sugar:sugar:1.3.1-SNAPSHOT')
+    compile('ru.kbakaras.sugar:sugar:1.3.1')
 
     compile('org.springframework.data:spring-data-jpa:2.0.+')
     compile('org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final')
@@ -28,11 +28,12 @@ task sourceJar(type: Jar) {
 }
 
 publishing {
-    /*repositories {
+    repositories {
         maven {
-            url "http://apps-srv-1/nexus/content/repositories/kbakaras"
+            url "http://apps-srv-1/nexus/content/repositories/glance"
+            name "Glance"
         }
-    }*/
+    }
     publications {
         mavenJava(MavenPublication) {
             from components.java
