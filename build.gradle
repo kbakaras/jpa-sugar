@@ -8,9 +8,6 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenLocal()
-    maven {
-        url "http://apps-srv-1/nexus/content/repositories/kbakaras"
-    }
     mavenCentral()
 }
 
